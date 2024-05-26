@@ -66,6 +66,21 @@ def adjust_image_size(image, width=640, height=480):
     resized_image = cv2.resize(image, (width, height), interpolation = cv2.INTER_AREA)
     return resized_image
 
+def prepare_artifacts(text):
+    new_text = " ".join(text.split())
+    text_length = len(new_text)
+
+    if text_length <= 2:
+        return new_text if text_length == 2 else ''
+
+    count = sum(1 for i in range(text_length - 2) if new_text[i] != ' ' == new_text[i+1] == ' ' and new_text[i+2] != ' ')
+
+    text_without_spaces = text.replace(' ', '')
+    if len(text_without_spaces) == count + 1:
+        return ''
+    else:
+        return new_text
+
 def get_formated_text(link):
     text = ''
     for page in link.pages:
@@ -76,7 +91,7 @@ def get_formated_text(link):
                         continue
                     text += word.value + " "
 
-    return remove_non_alphabetic(text)
+    return prepare_artifacts(remove_non_alphabetic(text))
 
 
 def predicted_text(image_patch):
@@ -128,7 +143,7 @@ def translate_image_text(image_path, lang='en', to_lang='ru'):
     thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
 
     height, width = thresh.shape
-    start_row, start_col = int(height * 78), int(0)
+    start_row, start_col = int(height * 0.78), int(0)
     end_row, end_col = int(height), int(width)
     cropped_img = thresh[start_row:end_row , start_col:end_col]
 
